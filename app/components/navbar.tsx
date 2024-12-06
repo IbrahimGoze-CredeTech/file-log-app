@@ -14,6 +14,9 @@ export default function Navbar() {
           <Link href="/upload" className="text-lg hover:underline">
             Upload
           </Link>
+          <Link href="/delete" className="text-lg hover:underline">
+            Delete
+          </Link>
         </div>
 
         <Link href="/" className="flex-1 text-center mx-auto">

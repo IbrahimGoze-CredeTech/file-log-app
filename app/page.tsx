@@ -8,13 +8,18 @@ export default function HomePage() {
       </h1>
       <div className="space-x-4">
         <Link href="/logs">
-          <button className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition">
+          <button className="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
             Log Management
           </button>
         </Link>
         <Link href="/upload">
           <button className="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
             File Storage
+          </button>
+        </Link>
+        <Link href="/delete">
+          <button className="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
+            Delete
           </button>
         </Link>
       </div>
