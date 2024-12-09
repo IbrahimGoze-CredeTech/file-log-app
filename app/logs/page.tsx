@@ -70,7 +70,12 @@ export default function LogsPage() {
         {filteredLogs.map((log: any, index) => (
           <li key={index} className="mb-4 p-4 border rounded">
             <p>
+<<<<<<< HEAD
               <strong>Service ID:</strong> {log.serviceId}
+=======
+              <strong>İşlem:</strong>{" "}
+              {log.serviceId === "delete" ? "Silme" : "Yükleme"}
+>>>>>>> e269b5d5c90cc66c701575013f90a319ca18f37e
             </p>
             <p>
               <strong>Detay:</strong> {log.detail}

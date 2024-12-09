@@ -6,6 +6,6 @@ export const GET = async () => {
   const db = client.db("fileLogDB");
   const logsCollection = db.collection("logs");
 
-  const logs = await logsCollection.find({}).toArray();
+  const logs = await logsCollection.find({}).sort({ timestamp: -1 }).toArray();
   return NextResponse.json(logs);
 };
