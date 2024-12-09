@@ -20,9 +20,16 @@ export default function LogsPage() {
       <ul>
         {logs.map((log: any, index) => (
           <li key={index} className="mb-4 p-4 border rounded">
-            <p><strong>Service ID:</strong> {log.serviceId}</p>
-            <p><strong>Detay:</strong> {log.detail}</p>
-            <p><strong>Tarih:</strong> {new Date(log.datesTemp).toLocaleString()}</p>
+            <p>
+              <strong>İşlem:</strong>{" "}
+              {log.serviceId === "delete" ? "Silme" : "Yükleme"}
+            </p>
+            <p>
+              <strong>Detay:</strong> {log.detail}
+            </p>
+            <p>
+              <strong>Tarih:</strong> {new Date(log.datesTemp).toLocaleString()}
+            </p>
           </li>
         ))}
       </ul>
