@@ -16,14 +16,33 @@ export async function DELETE(request: Request) {
     // MongoDB'ye bağlan
     const client = await clientPromise;
     const db = client.db("fileLogDB");
-    const filesCollection = db.collection("fs.files");
     const logsCollection = db.collection("logs");
-    // Dosyayı filename alanına göre sil
-    const result = await filesCollection.deleteOne({ filename });
-    if (result.deletedCount === 0) {
+    const existingFile = await db.collection("fs.files").findOne({ filename });
+
+    if (!existingFile) {
       return NextResponse.json(
-        { message: "Silinecek dosya bulunamadı." },
+        { message: "Dosya bulunamadı." },
         { status: 404 }
+      );
+    }
+
+    // Dosyanın chunks'larını sil
+    const deleteChunksResult = await db
+      .collection("fs.chunks")
+      .deleteMany({ files_id: existingFile._id });
+
+    // Dosyanın metadata'sını (fs.files) sil
+    const deleteFileResult = await db
+      .collection("fs.files")
+      .deleteOne({ _id: existingFile._id });
+
+    if (
+      deleteFileResult.deletedCount === 0 ||
+      deleteChunksResult.deletedCount === 0
+    ) {
+      return NextResponse.json(
+        { message: "Dosya silinemedi." },
+        { status: 500 }
       );
     }
     await logsCollection.insertOne({
