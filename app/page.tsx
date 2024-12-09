@@ -22,6 +22,16 @@ export default function HomePage() {
             Delete
           </button>
         </Link>
+        <Link href="/update">
+          <button className="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
+            Update
+          </button>
+        </Link>
+        <Link href="/download">
+          <button className="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition">
+            Download
+          </button>
+        </Link>
       </div>
     </div>
   );
