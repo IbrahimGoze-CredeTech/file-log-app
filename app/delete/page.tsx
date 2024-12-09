@@ -1,20 +1,27 @@
-"use client"
+"use client";
+
 import { useState, useEffect } from "react";
 
 export default function FileList() {
   const [files, setFiles] = useState([]);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Dosyaları listelemek
   useEffect(() => {
+    setLoading(true);
     fetch("/api/files") // Dosyaları al
       .then((res) => res.json())
       .then((data) => setFiles(data))
-      .catch((err) => setError("Dosyalar alınamadı."));
+      .catch(() => setError("Dosyalar alınamadı."))
+      .finally(() => setLoading(false));
   }, []);
 
   // Silme işlemi
   const handleDelete = async (filename: string) => {
+    if (!confirm(`${filename} dosyasını silmek istediğinizden emin misiniz?`))
+      return;
+
     try {
       const response = await fetch(`/api/delete?filename=${filename}`, {
         method: "DELETE",
@@ -34,16 +41,36 @@ export default function FileList() {
   };
 
   return (
-    <div>
-      {error && <p>{error}</p>}
-      <ul>
-        {files.map((file: any) => (
-          <li key={file._id}>
-            {file.filename}{" "}
-            <button onClick={() => handleDelete(file.filename)}>Sil</button>
-          </li>
-        ))}
-      </ul>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-2xl">
+        <h1 className="text-xl font-semibold text-gray-800 mb-4">
+          Dosya Listesi
+        </h1>
+        {loading && <p className="text-blue-500">Dosyalar yükleniyor...</p>}
+        {error && <p className="text-red-500">{error}</p>}
+        {files.length > 0 ? (
+          <ul className="space-y-3">
+            {files.map((file: any) => (
+              <li
+                key={file._id}
+                className="flex items-center justify-between bg-gray-50 p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                <span className="text-gray-700 font-medium">
+                  {file.filename}
+                </span>
+                <button
+                  onClick={() => handleDelete(file.filename)}
+                  className="px-3 py-1 bg-green-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  Sil
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          !loading && <p className="text-gray-500">Henüz dosya eklenmemiş.</p>
+        )}
+      </div>
     </div>
   );
 }
