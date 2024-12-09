@@ -19,7 +19,7 @@ export async function GET(request: Request) {
     const client = await clientPromise;
     const db = client.db("fileLogDB");
     const bucket = new GridFSBucket(db, { bucketName: "fs" });
-
+    const logsCollection = db.collection("logs");
     // Dosyayı GridFS'ten al
     const file = await db.collection("fs.files").findOne({ filename });
 
@@ -65,7 +65,11 @@ export async function GET(request: Request) {
       status: 200,
       headers,
     });
-
+    await logsCollection.insertOne({
+      serviceId: "download",
+      detail: `Dosya '${filename}' indirildi.`,
+      datesTemp: new Date(),
+    });
     return response;
   } catch (error) {
     console.error("API Hatası:", error);

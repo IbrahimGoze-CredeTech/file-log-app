@@ -47,7 +47,7 @@ export async function PATCH(request: Request) {
     const client = await clientPromise;
     const db = client.db("fileLogDB");
     const bucket = new GridFSBucket(db, { bucketName: "fs" });
-
+    const logsCollection = db.collection("logs");
     // 1. Mevcut dosyayı MongoDB'den sil
     const existingFile = await db.collection("fs.files").findOne({ filename });
 
@@ -103,7 +103,11 @@ export async function PATCH(request: Request) {
       }
       uploadStream.end();
     });
-
+    await logsCollection.insertOne({
+      serviceId: "update",
+      detail: `Dosya '${filename}' güncellendi.`,
+      datesTemp: new Date(),
+    });
     return NextResponse.json({ message: "Dosya başarıyla güncellendi." });
   } catch (error) {
     console.error("API Hatası:", error);
