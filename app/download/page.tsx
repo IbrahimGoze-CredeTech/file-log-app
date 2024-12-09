@@ -1,60 +1,53 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 const FileList = () => {
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState<{ filename: string }[] | undefined>(undefined);
 
   useEffect(() => {
+    // Dosya listesini almak için API isteği
     const fetchFiles = async () => {
-      const response = await fetch("/api/download");
+      const response = await fetch("/api/update");
       const data = await response.json();
-      setFiles(data.files);
+      setFiles(data.files); // API'den gelen dosya listesini state'e kaydet
     };
 
     fetchFiles();
   }, []);
 
-  const handleDownload = async (filename: string) => {
-    try {
-      const response = await fetch(`/api/download?filename=${filename}`);
-      if (!response.ok) {
-        throw new Error("Dosya indirilemedi.");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", filename);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      console.error("Dosya indirme hatası:", error);
-    }
+  const handleDownload = (filename: string) => {
+    // İndirme işlemini başlatan fonksiyon
+    const downloadLink = `/api/download?filename=${encodeURIComponent(filename)}`;
+    window.location.href = downloadLink; // İndirmenin başlatılması
   };
 
+  // Eğer dosyalar henüz yüklenmemişse, yükleniyor mesajını göster
+  if (files === undefined) {
+    return <p>Yükleniyor...</p>;
+  }
+
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold text-center mb-6 text-azure-radiance-500">
-        Dosya Listesi
-      </h1>
+    <div>
+      <h1>Dosya Listesi</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {files.map((file: { filename: string }) => (
-          <div
-            key={file.filename}
-            className="bg-white shadow-md rounded-lg p-4 flex justify-between items-center"
-          >
-            <span className="text-gray-800">{file.filename}</span>
-            <button
-              onClick={() => handleDownload(file.filename)}
-              className="bg-azure-radiance-500 text-white px-4 py-2 rounded-md hover:bg-azure-radiance-600 transition"
+        {files.length === 0 ? (
+          <p>Hiç dosya yok.</p>
+        ) : (
+          files.map((file) => (
+            <div
+              key={file.filename}
+              className="bg-white shadow-md rounded-lg p-4 flex justify-between items-center"
             >
-              İndir
-            </button>
-          </div>
-        ))}
+              <span>{file.filename}</span>
+              <button
+                onClick={() => handleDownload(file.filename)}
+                className="bg-blue-500 text-white p-2 rounded"
+              >
+                İndir
+              </button>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
