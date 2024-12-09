@@ -2,7 +2,9 @@
 import { useEffect, useState } from "react";
 
 const FileList = () => {
-  const [files, setFiles] = useState<{ filename: string }[] | undefined>(undefined);
+  const [files, setFiles] = useState<{ filename: string }[] | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     // Dosya listesini almak için API isteği
@@ -17,7 +19,9 @@ const FileList = () => {
 
   const handleDownload = (filename: string) => {
     // İndirme işlemini başlatan fonksiyon
-    const downloadLink = `/api/download?filename=${encodeURIComponent(filename)}`;
+    const downloadLink = `/api/download?filename=${encodeURIComponent(
+      filename
+    )}`;
     window.location.href = downloadLink; // İndirmenin başlatılması
   };
 
@@ -36,7 +40,7 @@ const FileList = () => {
           files.map((file) => (
             <div
               key={file.filename}
-              className="bg-white shadow-md rounded-lg p-4 flex justify-between items-center"
+              className="bg-white text-black shadow-md rounded-lg p-4 flex justify-between items-center"
             >
               <span>{file.filename}</span>
               <button
