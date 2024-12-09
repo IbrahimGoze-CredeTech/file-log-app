@@ -25,6 +25,13 @@ const FileList = () => {
     window.location.href = downloadLink; // İndirmenin başlatılması
   };
 
+  const handlePreview = (filename: string) => {
+    const previewLink = `/api/download?filename=${encodeURIComponent(
+      filename
+    )}&preview=true`;
+    window.open(previewLink, "_blank"); // Yeni sekmede dosyayı önizle
+  };
+
   // Eğer dosyalar henüz yüklenmemişse, yükleniyor mesajını göster
   if (files === undefined) {
     return <p>Yükleniyor...</p>;
@@ -43,12 +50,20 @@ const FileList = () => {
               className="bg-white text-black shadow-md rounded-lg p-4 flex justify-between items-center"
             >
               <span>{file.filename}</span>
-              <button
-                onClick={() => handleDownload(file.filename)}
-                className="bg-blue-500 text-white p-2 rounded"
-              >
-                İndir
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleDownload(file.filename)}
+                  className="bg-blue-500 text-white p-2 rounded"
+                >
+                  İndir
+                </button>
+                <button
+                  onClick={() => handlePreview(file.filename)}
+                  className="bg-green-500 text-white p-2 rounded"
+                >
+                  Önizle
+                </button>
+              </div>
             </div>
           ))
         )}
