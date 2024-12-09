@@ -1,12 +1,13 @@
 "use client";
+
 import { useState, useEffect } from "react";
 
 export default function FileUpdateForm() {
-  const [files, setFiles] = useState<{ filename: string }[]>([]); // Dosya listesini tutuyor
+  const [files, setFiles] = useState<{ filename: string }[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [newFile, setNewFile] = useState<File | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
-  // Dosya listesini almak için API isteği
   useEffect(() => {
     const fetchFiles = async () => {
       const response = await fetch("/api/update");
@@ -28,7 +29,7 @@ export default function FileUpdateForm() {
 
   const handleUpdate = async () => {
     if (!selectedFile || !newFile) {
-      console.error("Lütfen bir dosya seçin ve yeni dosyayı yükleyin.");
+      setMessage("Lütfen bir dosya seçin ve yeni dosyayı yükleyin.");
       return;
     }
 
@@ -44,37 +45,79 @@ export default function FileUpdateForm() {
       const data = await response.json();
 
       if (response.ok) {
-        console.log("Dosya başarıyla güncellendi:", data.message);
+        setMessage("Dosya başarıyla güncellendi.");
       } else {
-        console.error("Güncelleme hatası:", data.message);
+        setMessage(`Güncelleme hatası: ${data.message}`);
       }
     } catch (error) {
-      console.error("Hata oluştu:", error);
+      setMessage(`Hata oluştu: ${error}`);
     }
   };
 
   return (
-    <div>
-      <h2>Dosya Güncelleme</h2>
+    <div className="container mx-auto p-6">
+      <h2 className="text-2xl font-bold text-center mb-6 text-azure-radiance-500">
+        Dosya Güncelleme
+      </h2>
 
-      <div>
-        <label htmlFor="files">Mevcut Dosyayı Seçin: </label>
-        <select id="filename" onChange={handleFileSelect}>
+      {message && (
+        <div
+          className={`mb-4 p-4 rounded-md ${
+            message.includes("başarıyla")
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {message}
+        </div>
+      )}
+
+      <div className="mb-4">
+        <label
+          htmlFor="files"
+          className="block text-white-700 font-medium mb-2"
+        >
+          Mevcut Dosyayı Seçin
+        </label>
+        <select
+          id="filename"
+          onChange={handleFileSelect}
+          className="block w-full border text-black border-gray-300 rounded-md p-2 focus:ring-azure-radiance-500 focus:border-azure-radiance-500"
+        >
           <option value="">Dosya Seçin</option>
           {files.map((file) => (
-            <option key={file.filename} value={file.filename}>
+            <option
+              className="text-black"
+              key={file.filename}
+              value={file.filename}
+            >
               {file.filename}
             </option>
           ))}
         </select>
       </div>
 
-      <div>
-        <label htmlFor="newFile">Yeni Dosyayı Seçin: </label>
-        <input type="file" id="newFile" onChange={handleFileChange} />
+      <div className="mb-4">
+        <label
+          htmlFor="newFile"
+          className="block text-white-700 font-medium mb-2"
+        >
+          Yeni Dosyayı Seçin
+        </label>
+        <input
+          type="file"
+          id="newFile"
+          onChange={handleFileChange}
+          className="block w-full border border-gray-300 rounded-md p-2 focus:ring-azure-radiance-500 focus:border-azure-radiance-500"
+        />
       </div>
 
-      <button onClick={handleUpdate}>Dosyayı Güncelle</button>
+      <button
+        onClick={handleUpdate}
+        className="w-full bg-azure-radiance-500 text-white py-2 px-4 rounded-md hover:bg-azure-radiance-600 transition"
+      >
+        Dosyayı Güncelle
+      </button>
     </div>
   );
 }

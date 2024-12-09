@@ -17,6 +17,12 @@ export default function Navbar() {
           <Link href="/delete" className="text-lg hover:underline">
             Delete
           </Link>
+          <Link href="/update" className="text-lg hover:underline">
+            Update
+          </Link>
+          <Link href="/download" className="text-lg hover:underline">
+            Download
+          </Link>
         </div>
 
         <Link href="/" className="flex-1 text-center mx-auto">
