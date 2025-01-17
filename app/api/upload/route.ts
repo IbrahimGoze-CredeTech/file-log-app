@@ -2,12 +2,24 @@ import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 import { GridFSBucket } from "mongodb";
 
-export const POST = async (req: Request) => {
-  const client = await clientPromise;
-  const db = client.db("fileLogDB");
-  const bucket = new GridFSBucket(db);
+export const config = {
+  api: {
+    bodyParser: false, // Büyük dosyalar için body parser'ı devre dışı bırak
+    responseLimit: false,
+    maxDuration: 120, // 2 dakikaya çıkaralım
+  },
+};
 
+export const POST = async (req: Request) => {
   try {
+    const db = (await clientPromise).db();
+    const bucket = new GridFSBucket(db, {
+      chunkSizeBytes: 1024 * 1024 * 10, // 10MB chunk size
+    });
+
+    // Bulk işlemler için index oluşturma
+    await db.collection("files").createIndex({ filename: 1 });
+
     const formData = await req.formData();
     const file = formData.get("file") as File;
 
@@ -35,13 +47,15 @@ export const POST = async (req: Request) => {
     });
 
     return NextResponse.json({ message: "Dosya başarıyla yüklendi." });
-  } catch (error) {
+  } catch (error: unknown) {
     const logsCollection = db.collection("logs");
     await logsCollection.insertOne({
       serviceId: "file_upload",
       datesTemp: new Date(),
       labels: ["error"],
-      detail: `Dosya yüklenirken hata oluştu: ${error.message}`,
+      detail: `Dosya yüklenirken hata oluştu: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`,
     });
 
     return NextResponse.json(
