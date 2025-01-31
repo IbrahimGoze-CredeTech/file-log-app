@@ -1,66 +1,68 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
-import { GridFSBucket } from "mongodb";
+import { GridFSBucket, Db } from "mongodb";
 
 export const config = {
   api: {
-    bodyParser: false, // Büyük dosyalar için body parser'ı devre dışı bırak
+    bodyParser: false,
     responseLimit: false,
-    maxDuration: 120, // 2 dakikaya çıkaralım
   },
 };
 
-export const POST = async (req: Request) => {
-  try {
-    const db = (await clientPromise).db();
-    const bucket = new GridFSBucket(db, {
-      chunkSizeBytes: 1024 * 1024 * 10, // 10MB chunk size
-    });
+export const maxDuration = 300;
 
-    // Bulk işlemler için index oluşturma
-    await db.collection("files").createIndex({ filename: 1 });
+export async function POST(req: Request) {
+  let db: Db | undefined;
+  try {
+    const client = await clientPromise;
+    db = client.db();
+    const bucket = new GridFSBucket(db, {
+      chunkSizeBytes: 1024 * 1024, // 1MB chunks
+    });
 
     const formData = await req.formData();
     const file = formData.get("file") as File;
 
     if (!file) {
-      return NextResponse.json(
-        { message: "Dosya bulunamadı!" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Dosya bulunamadı!" }, { status: 400 });
     }
 
-    const uploadStream = bucket.openUploadStream(file.name, {
-      contentType: file.type,
-      metadata: { size: file.size },
-    });
-
     const buffer = await file.arrayBuffer();
-    uploadStream.end(Buffer.from(buffer));
 
-    const logsCollection = db.collection("logs");
-    await logsCollection.insertOne({
-      serviceId: "file_upload",
-      datesTemp: new Date(),
-      labels: ["info"],
-      detail: `Dosya ${file.name} başarıyla yüklendi.`,
+    return new Promise((resolve) => {
+      const uploadStream = bucket.openUploadStream(file.name, {
+        contentType: file.type,
+        metadata: { size: file.size },
+      });
+
+      uploadStream.on("error", (error) => {
+        console.error("Upload error:", error);
+        resolve(
+          NextResponse.json(
+            { error: `Yükleme hatası: ${error.message}` },
+            { status: 500 }
+          )
+        );
+      });
+
+      uploadStream.on("finish", () => {
+        console.log(`Dosya yüklendi: ${file.name}`);
+        resolve(
+          NextResponse.json({
+            message: "Dosya başarıyla yüklendi",
+            fileId: uploadStream.id.toString(),
+          })
+        );
+      });
+
+      uploadStream.write(Buffer.from(buffer));
+      uploadStream.end();
     });
-
-    return NextResponse.json({ message: "Dosya başarıyla yüklendi." });
-  } catch (error: unknown) {
-    const logsCollection = db.collection("logs");
-    await logsCollection.insertOne({
-      serviceId: "file_upload",
-      datesTemp: new Date(),
-      labels: ["error"],
-      detail: `Dosya yüklenirken hata oluştu: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`,
-    });
-
+  } catch (error: any) {
+    console.error("API error:", error);
     return NextResponse.json(
-      { message: "Dosya yüklenirken hata oluştu." },
+      { error: `API Hatası: ${error.message}` },
       { status: 500 }
     );
   }
-};
+}
