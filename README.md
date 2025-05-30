@@ -1,3 +1,18 @@
+# File Log App
+
+A Next.js application for managing file logs.
+
+## Features
+
+- File upload and download
+- Log management
+- File updates and deletions
+- Backup functionality
+
+## Testing Husky Hooks
+
+This line is added to test Husky pre-commit and pre-push hooks.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
