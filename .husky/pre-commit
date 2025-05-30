@@ -1,14 +1,7 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Stash any changes to keep the working directory clean
-git stash -q --keep-index
 
 # Run lint-staged
 npx lint-staged
 
 # Run tests
 npm test
-
-# Restore stashed changes
-git stash pop -q
